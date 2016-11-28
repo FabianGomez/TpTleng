@@ -23,8 +23,8 @@ def p_point_list_one(subexpressions):
 
 def p_point_list_append(subexpressions):
     'point_list_non_empty : point_list_non_empty COMMA point'
-    point_token = subexpressions[3]
-    sub_point_list = subexpressions[1]
+    point_token = subexpressions[2]
+    sub_point_list = subexpressions[0]
     if sub_point_list["type"] != point_token["type"]:
         raise SemanticException("Incompatible type.")
     subexpressions[0] = {"size": sub_point_list["size"] + 1, "type": point_token["type"]}
@@ -41,29 +41,76 @@ def p_point(subexpressions):
 
     subexpressions[0] = {"type": "point"}
 
-#falta poder ponerle otro orden 
-def p_size(size):
-	'size_declaration: SIZE HEIGHT num COMMA WIDTH num' 
-	first_num = subexpressions[2]
-	second_num = subexpressions[5]
-	if first_num["type"] != "int" && first_num["type"] != "float":
+def p_args_lambda(subexpressions):
+	'args_declaration :'
+
+def p_args_append(subexpressions):
+	'args_declaration : args_declaration COMMA args'
+	subexpressions[0] = subexpressions[0].update(subexpressions[2])
+
+def p_args_terminal_height(subexpressions):
+	'args_declaration : HEIGHT num'
+	num = subexpressions[1]
+	if num["type"] != "int" && num["type"] != "float":
 		raise SemanticException("Incompatible HEIGHT type")
-	if second_num["type"] != "int" && second_num["type"] != "float":
+
+	subexpressions[0] = {"HEIGHT":True,"HEIGHT_value":num["value"]}
+
+def p_args_terminal_width(subexpressions):
+	'args_declaration : WIDTH num'
+	num = subexpressions[1]
+
+	if num["type"] != "int" && num["type"] != "float":
 		raise SemanticException("Incompatible WIDTH type")
+
+	subexpressions[0] = {"WIDTH":True,"WIDTH_value":num["value"]}
+
+#def p_size(subexpressions):
+#	'size_declaration: SIZE HEIGHT num COMMA WIDTH num' 
+#	first_num = subexpressions[2]
+#	second_num = subexpressions[5]
+#	if first_num["type"] != "int" && first_num["type"] != "float":
+#		raise SemanticException("Incompatible HEIGHT type")
+#	if second_num["type"] != "int" && second_num["type"] != "float":
+#		raise SemanticException("Incompatible WIDTH type")
 	
-	subexpressions[0] = {"type": "size"}
+#	subexpressions[0] = {"type": "size"}
+
+#intento de curry
+def p_size(subexpressions):
+	'size_declaration: SIZE args args_extra' 
+	args = subexpressions[1]
+	if !(args.has_key["HEIGHT"] && args.has_key["WIDTH"]):
+		raise SemanticException("Incopatible size args")
+	if len(args) > 4
+		raise SemanticException("Incopatible size args")
+	
+	subexpressions[0] = {"type": "size","size":True}
+
+
+#def p_rectangle(subexpressions):
+#	'rectangle_declaration: RECTANGLE UPPER_LEFT point COMMA HEIGHT num COMMA WIDTH num'
+#	point = subexpressions[2]
+#	first_num = subexpressions[5]
+#	second_num = subexpressions[8]
+#	if point["type"] != "point":
+#		raise SemanticException("Incompatible UPPER_LEFT type")
+#	if first_num["type"] != "int" && first_num["type"] != "float":
+#		raise SemanticException("Incompatible HEIGHT type")
+#	if second_num["type"] != "int" && second_num["type"] != "float":
+#		raise SemanticException("Incompatible WIDTH type")
+
+#	subexpressions[0] = {"type": "rectangle"}
+
 
 def p_rectangle(subexpressions):
-	'rectangle_declaration: RECTANGLE UPPER_LEFT point COMMA HEIGHT num COMMA WIDTH num'
-	point = subexpressions[2]
-	first_num = subexpressions[5]
-	second_num = subexpressions[8]
-	if point["type"] != "point":
-		raise SemanticException("Incompatible UPPER_LEFT type")
-	if first_num["type"] != "int" && first_num["type"] != "float":
-		raise SemanticException("Incompatible HEIGHT type")
-	if second_num["type"] != "int" && second_num["type"] != "float":
-		raise SemanticException("Incompatible WIDTH type")
+	'rectangle_declaration: RECTANGLE args args_extra'
+	args = subexpressions[1]
+
+	if !(args.has_key["UPPER_LEFT"] &&args.has_key["HEIGHT"] && args.has_key["WIDTH"]):
+		raise SemanticException("Incopatible rectangle args")
+	if len(args) > 6
+		raise SemanticException("Incopatible rectangle args")
 
 	subexpressions[0] = {"type": "rectangle"}
 
