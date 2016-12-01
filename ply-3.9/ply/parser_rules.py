@@ -3,7 +3,7 @@ from expressions import *
 
 def p_pointarray(subexpr):
     'array_declaration : LBRACE point_list RBRACE'
-    point_list = subexpressions[8]
+    subexpressions[0] = subexpressions[2]
 
 def p_point_list_empty(subexpressions):
     'point_list :'
@@ -23,8 +23,8 @@ def p_point_list_one(subexpressions):
 
 def p_point_list_append(subexpressions):
     'point_list_non_empty : point_list_non_empty COMMA point'
-    point_token = subexpressions[2]
-    sub_point_list = subexpressions[0]
+    point_token = subexpressions[3]
+    sub_point_list = subexpressions[1]
     if sub_point_list["type"] != point_token["type"]:
         raise SemanticException("Incompatible type.")
     subexpressions[0] = {"size": sub_point_list["size"] + 1, "type": point_token["type"]}
@@ -32,8 +32,8 @@ def p_point_list_append(subexpressions):
 def p_point(subexpressions):
 	'poin_declaration: LPAREN INTEGER COMMA INTEGER RPAREN'
 	#creo que estas verificaciones son al pedo
-	first_point_token = subexpressions[1]
-	second_point_token = subexpressions[3]
+	first_point_token = subexpressions[2]
+	second_point_token = subexpressions[4]
 	if first_point_token["type"] != "int":
         raise SemanticException("Incompatible point type")
 	if second_point_token["type"] != "int":
@@ -41,16 +41,26 @@ def p_point(subexpressions):
 
     subexpressions[0] = {"type": "point"}
 
+
 def p_args_lambda(subexpressions):
-	'args_declaration :'
+	'args :'
+	subexpressions[0] = {}
+
+def p_args_list(subexpressions):
+	'args : args_list'
+	subexpressions[0] = subexpressions[1]
+
+def p_args_list_one(subexpressions):
+	'args_list : args_declaration'
+	subexpressions[0] = subexpressions[1]
 
 def p_args_append(subexpressions):
-	'args_declaration : args_declaration COMMA args'
-	subexpressions[0] = subexpressions[0].update(subexpressions[2])
+	'args_list : args_list COMMA args_declaration'
+	subexpressions[0] = subexpressions[1].update(subexpressions[3])
 
 def p_args_terminal_height(subexpressions):
 	'args_declaration : HEIGHT num'
-	num = subexpressions[1]
+	num = subexpressions[2]
 	if num["type"] != "int" && num["type"] != "float":
 		raise SemanticException("Incompatible HEIGHT type")
 
@@ -58,7 +68,7 @@ def p_args_terminal_height(subexpressions):
 
 def p_args_terminal_width(subexpressions):
 	'args_declaration : WIDTH num'
-	num = subexpressions[1]
+	num = subexpressions[2]
 
 	if num["type"] != "int" && num["type"] != "float":
 		raise SemanticException("Incompatible WIDTH type")
@@ -79,7 +89,7 @@ def p_args_terminal_width(subexpressions):
 #intento de curry
 def p_size(subexpressions):
 	'size_declaration: SIZE args args_extra' 
-	args = subexpressions[1]
+	args = subexpressions[2]
 	if !(args.has_key["HEIGHT"] && args.has_key["WIDTH"]):
 		raise SemanticException("Incopatible size args")
 	if len(args) > 4
@@ -105,7 +115,7 @@ def p_size(subexpressions):
 
 def p_rectangle(subexpressions):
 	'rectangle_declaration: RECTANGLE args args_extra'
-	args = subexpressions[1]
+	args = subexpressions[2]
 
 	if !(args.has_key["UPPER_LEFT"] &&args.has_key["HEIGHT"] && args.has_key["WIDTH"]):
 		raise SemanticException("Incopatible rectangle args")
@@ -117,8 +127,8 @@ def p_rectangle(subexpressions):
 
 def p_line(subexpressions):
 	'line_declaration: LINE FROM point COMMA TO point'
-	first_point = subexpressions[2]
-	second_point = subexpressions[5]
+	first_point = subexpressions[3]
+	second_point = subexpressions[6]
 	if first_point["type"] != "point":
 		raise SemanticException("Incompatible FROM type")
 	if second_point["type"] != "point":
@@ -129,8 +139,8 @@ def p_line(subexpressions):
 
 def p_circle(subexpressions):
 	'circle_declaration: CIRCLE CENTER point COMMA RADIUS num'
-	point = subexpressions[2]
-	number = subexpressions[5]
+	point = subexpressions[3]
+	number = subexpressions[6]
 	if point["type"] != "point":
 		raise SemanticException("Incompatible CENTER type")
 	if number["type"] != "int" && number["type"] != "float":
