@@ -3,7 +3,7 @@ tokens = [
 'INTEGER', 'FLOAT', 'STRING','LPAREN', 'RPAREN',
     'LBRACKET', 'RBRACKET','COMMA',
 #inicios de funciones
-    'SIZE','RECTANGLE','LINE','CIRCLE','POLYLINE','POLYGON','TEXT',
+    'SIZE','RECTANGLE','LINE','CIRCLE','ELLIPSE','POLYLINE','POLYGON','TEXT',
 #parametros obligatorios
 	'HEIGHT','WIDTH','UPPER_LEFT','FROM','TO','CENTER','RADIUS','RX','RY','TO','AT',
 
@@ -47,6 +47,7 @@ t_FSIZE            = r'size '
 t_RECTANGLE        = r'rectangle '
 t_LINE             = r'line '
 t_CIRCLE           = r'circle '
+t_ELLIPSE          = r'ellipse '
 t_POLYLINE         = r'polyline '
 t_POLYGON          = r'polygon '
 t_TEXT             = r'text '
