@@ -146,7 +146,7 @@ def p_arg_size(subexpressions):
     subexpressions[0] = ("size", subexpressions[3])
 
 def p_f_size(subexpressions):
-    'f : SIZE arglist' 
+    'f : SIZE arglist NEWLINE' 
     args = subexpressions[2]
     
     hasArg("width", args)
@@ -156,7 +156,7 @@ def p_f_size(subexpressions):
 
     
 def p_f_rectangle(subexpressions):
-    'f : RECTANGLE arglist' 
+    'f : RECTANGLE arglist NEWLINE' 
     args = subexpressions[2]
     
     #hasArg("width", args)
@@ -167,7 +167,7 @@ def p_f_rectangle(subexpressions):
     subexpressions[0] = Rectangle(args["size"], args["upper_left"], getOptionalArgs(args, False)) 
 
 def p_f_line(subexpressions):
-    'f : LINE arglist' 
+    'f : LINE arglist NEWLINE' 
     args = subexpressions[2]
     
     hasArg("from", args)
@@ -176,7 +176,7 @@ def p_f_line(subexpressions):
     subexpressions[0] = Line(args["froM"], args["to"], getOptionalArgs(args, False)) 
 
 def p_f_circle(subexpressions):
-    'f : CIRCLE arglist' 
+    'f : CIRCLE arglist NEWLINE' 
     args = subexpressions[2]
     
     hasArg("center", args)
@@ -185,7 +185,7 @@ def p_f_circle(subexpressions):
     subexpressions[0] = Circle(args["center"], args["radius"], getOptionalArgs(args, False)) 
     
 def p_f_ellipse(subexpressions):
-    'f : ELLIPSE arglist' 
+    'f : ELLIPSE arglist NEWLINE' 
     args = subexpressions[2]
     
     hasArg("center", args)
@@ -195,7 +195,7 @@ def p_f_ellipse(subexpressions):
     subexpressions[0] = Ellipse(args["center"], args["rx"], args["ry"], getOptionalArgs(args, False))
 
 def p_f_polyline(subexpressions):
-    'f : POLYLINE arglist' 
+    'f : POLYLINE arglist NEWLINE' 
     args = subexpressions[2]
     
     hasArg("points", args)
@@ -203,7 +203,7 @@ def p_f_polyline(subexpressions):
     subexpressions[0] = Polyline(args["points"], getOptionalArgs(args, False))
     
 def p_f_polygon(subexpressions):
-    'f : POLYGON arglist' 
+    'f : POLYGON arglist NEWLINE' 
     args = subexpressions[2]
     
     hasArg("points", args)
@@ -211,7 +211,7 @@ def p_f_polygon(subexpressions):
     subexpressions[0] = Polygon(args["points"], getOptionalArgs(args, False))
 
 def p_f_text(subexpressions):
-    'f : TEXT arglist' 
+    'f : TEXT arglist NEWLINE' 
     args = subexpressions[2]
     
     hasArg("t", args)

@@ -17,7 +17,7 @@ con algún valor de ese elemento.
 """
 tokens = [
 #
-'NUMBER', 'STRING','LPAREN', 'RPAREN',
+'NEWLINE','NUMBER', 'STRING','LPAREN', 'RPAREN',
     'LBRACKET', 'RBRACKET','COMMA', 'EQUAL',
 #inicios de funciones
     'SIZE','RECTANGLE','LINE','CIRCLE','ELLIPSE','POLYLINE','POLYGON','TEXT',
