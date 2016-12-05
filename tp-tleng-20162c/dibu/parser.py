@@ -40,18 +40,15 @@ def p_error(subexpr):
 # Producciones FPrima
 def p_funciones_lambda(subexpressions):
     'fPrima : '
-    subexpressions[0] = None
-    pass
+    subexpressions[0] = []
 
 def p_funciones(subexpressions):
     'fPrima : f fPrima'
     rec = subexpressions[2]
     f = subexpressions[1]
-     
-    if rec is None: # usaron la produccion F'-> lambda
-        subexpressions[0] = [f]
-    else: # agrego la funcion fun a la lista de funciones rec
-        subexpressions[0] = [f] ++ rec
+    
+    rec.insert(0,f)
+    subexpressions[0] = rec
         
 
 # Producciones ArgList
@@ -146,7 +143,7 @@ def p_arg_size(subexpressions):
     subexpressions[0] = ("size", subexpressions[3])
 
 def p_f_size(subexpressions):
-    'f : SIZE arglist NEWLINE' 
+    'f : SIZE arglist' 
     args = subexpressions[2]
     
     hasArg("width", args)
@@ -156,7 +153,7 @@ def p_f_size(subexpressions):
 
     
 def p_f_rectangle(subexpressions):
-    'f : RECTANGLE arglist NEWLINE' 
+    'f : RECTANGLE arglist' 
     args = subexpressions[2]
     
     #hasArg("width", args)
@@ -167,7 +164,7 @@ def p_f_rectangle(subexpressions):
     subexpressions[0] = Rectangle(args["size"], args["upper_left"], getOptionalArgs(args, False)) 
 
 def p_f_line(subexpressions):
-    'f : LINE arglist NEWLINE' 
+    'f : LINE arglist' 
     args = subexpressions[2]
     
     hasArg("from", args)
@@ -176,7 +173,7 @@ def p_f_line(subexpressions):
     subexpressions[0] = Line(args["froM"], args["to"], getOptionalArgs(args, False)) 
 
 def p_f_circle(subexpressions):
-    'f : CIRCLE arglist NEWLINE' 
+    'f : CIRCLE arglist' 
     args = subexpressions[2]
     
     hasArg("center", args)
@@ -185,7 +182,7 @@ def p_f_circle(subexpressions):
     subexpressions[0] = Circle(args["center"], args["radius"], getOptionalArgs(args, False)) 
     
 def p_f_ellipse(subexpressions):
-    'f : ELLIPSE arglist NEWLINE' 
+    'f : ELLIPSE arglist' 
     args = subexpressions[2]
     
     hasArg("center", args)
@@ -195,7 +192,7 @@ def p_f_ellipse(subexpressions):
     subexpressions[0] = Ellipse(args["center"], args["rx"], args["ry"], getOptionalArgs(args, False))
 
 def p_f_polyline(subexpressions):
-    'f : POLYLINE arglist NEWLINE' 
+    'f : POLYLINE arglist' 
     args = subexpressions[2]
     
     hasArg("points", args)
@@ -203,7 +200,7 @@ def p_f_polyline(subexpressions):
     subexpressions[0] = Polyline(args["points"], getOptionalArgs(args, False))
     
 def p_f_polygon(subexpressions):
-    'f : POLYGON arglist NEWLINE' 
+    'f : POLYGON arglist' 
     args = subexpressions[2]
     
     hasArg("points", args)
@@ -211,7 +208,7 @@ def p_f_polygon(subexpressions):
     subexpressions[0] = Polygon(args["points"], getOptionalArgs(args, False))
 
 def p_f_text(subexpressions):
-    'f : TEXT arglist NEWLINE' 
+    'f : TEXT arglist' 
     args = subexpressions[2]
     
     hasArg("t", args)
@@ -237,17 +234,17 @@ def buildSVG(ls):
     c = 0
     s = None
     for f in ls:
-        if isinstance(f, expressions.Size):
+        if isinstance(f, Size):
             c = c+1
             s = f
-                         
+   
     if c > 1 or c < 1:
         pass #tirar error
                          
     # 2) A partir del objeto size lo evaluamos para conseguir el tamaño del canvas y lo generamos con svgwriter
     
     # el nombre realmente no importa dado que nunca lo guardamos a disco
-    dwg = svgwrite.Drawing('test.svg', size=f.evaluate()) # es nuestro lienzo para dibujar
+    dwg = svgwrite.Drawing('test.svg', size=s.evaluate(None)) # es nuestro lienzo para dibujar
     
     # 3) El drawing se lo pasamos a cada expresión de la lista con el método evaluar                         
     # iteramos por cada expression (que son funciones) y las evaluamos para que se agreguen al canvas (si es necesario)

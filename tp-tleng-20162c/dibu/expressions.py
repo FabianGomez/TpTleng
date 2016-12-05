@@ -27,7 +27,6 @@ class Size(Expression):
 
 class Rectangle(Expression):
     def __init__(self, size, upper_left, optional):
-        print("UPER "+  str(upper_left))
         self.size = size
         self.upper_left = upper_left
         self.optional = optional
