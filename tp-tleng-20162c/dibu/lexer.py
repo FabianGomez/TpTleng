@@ -31,7 +31,7 @@ tokens = [
 
 
 def t_NUMBER(token):
-    #primera parte es para integers y la segunda para floats
+    #primera parte es para floats  y la segunda para integers
     r'\d+\.\d+|\d+'
     # Floats y integers son el mismo token. 
     if token.value.isdigit():

@@ -1,26 +1,13 @@
 import ply.yacc as yacc
 import collections
 
+import svgwrite
+from expressions import *
+
 from lexer import tokens
 
-# Clases para las funciones
-Size = collections.namedtuple('Size', 'width height optional')
-Rectangle = collections.namedtuple('Rectangle', 'width height upper_left optional')
-# from es una palabra reservada del lenguaje por eso hacemos froM
-Line = collections.namedtuple('Line', 'froM to optional')
-Circle = collections.namedtuple('Circle', 'center radius optional')
-Ellipse = collections.namedtuple('Ellipse', 'center rx ry optional')
-Polyline = collections.namedtuple('Polyline', 'points optional')
-Polygon = collections.namedtuple('Polygon', 'points optional')
-# los opcionales de text pueden tener dos mas que son especificos
-Text = collections.namedtuple('Text', 't at optional')
-
-# Clases intermedias
-fPrima = collections.namedtuple('fPrima', 'f1 f2')
-Point = collections.namedtuple('Point', 'x y')
 
 # un argumento es una tupla (nombreArgumento, valor)
-
 # argList es un diccionario 
 
 # Funciones auxiliares
@@ -46,17 +33,26 @@ def getOptionalArgs(args, isText):
             
     return res
 
+def p_error(subexpr):
+    raise Exception("Syntax error.")
+
 # Producciones
 # Producciones FPrima
 def p_funciones_lambda(subexpressions):
     'fPrima : '
+    subexpressions[0] = None
     pass
 
 def p_funciones(subexpressions):
     'fPrima : f fPrima'
     rec = subexpressions[2]
-    fun = subexpressions[1]
-    subexpressions[0] = fPrima(f1=subexpressions[1], f2=subexpressions[2])
+    f = subexpressions[1]
+     
+    if rec is None: # usaron la produccion F'-> lambda
+        subexpressions[0] = [f]
+    else: # agrego la funcion fun a la lista de funciones rec
+        subexpressions[0] = [f] ++ rec
+        
 
 # Producciones ArgList
 def p_arglist_arg(subexpressions):
@@ -79,7 +75,6 @@ def p_arglist(subexpressions):
 # Producciones Arg
 def p_arg_height(subexpressions):
     'arg : HEIGHT EQUAL NUMBER'
-    print(subexpressions[3])
     subexpressions[0] = ("height", subexpressions[3]["value"])
 
 def p_arg_width(subexpressions):
@@ -145,7 +140,11 @@ def p_arg_font_family(subexpressions):
 def p_arg_font_size(subexpressions):
     'arg : FSIZE EQUAL STRING'
     subexpressions[0] = ("font-size", subexpressions[3]["value"])
-        
+
+def p_arg_size(subexpressions):
+    'arg : SIZE EQUAL point'
+    subexpressions[0] = ("size", subexpressions[3])
+
 def p_f_size(subexpressions):
     'f : SIZE arglist' 
     args = subexpressions[2]
@@ -160,11 +159,12 @@ def p_f_rectangle(subexpressions):
     'f : RECTANGLE arglist' 
     args = subexpressions[2]
     
-    hasArg("width", args)
-    hasArg("height", args)    
+    #hasArg("width", args)
+    #hasArg("height", args)
+    hasArg("size", args)
     hasArg("upper_left", args)
     
-    subexpressions[0] = Rectangle(args["width"], args["height"], args["upper_left"], getOptionalArgs(args, False)) 
+    subexpressions[0] = Rectangle(args["size"], args["upper_left"], getOptionalArgs(args, False)) 
 
 def p_f_line(subexpressions):
     'f : LINE arglist' 
@@ -221,7 +221,7 @@ def p_f_text(subexpressions):
           
 def p_point(subexpressions):
     'point : LPAREN NUMBER COMMA NUMBER RPAREN'
-    subexpressions[0] = (subexpressions[2], subexpressions[4])
+    subexpressions[0] = (subexpressions[2]["value"], subexpressions[4]["value"])
                                                            
 # Build the parser
 parser = yacc.yacc(debug=True)
@@ -229,3 +229,30 @@ parser = yacc.yacc(debug=True)
 def parse(str):
     """Dado un string, me lo convierte a SVG."""
     return parser.parse(str)
+
+def buildSVG(ls):
+    # Si todo fue exitoso ls debería ser una lista de expresiones.
+    # 1) Revisamos que solo exista una expresion Size
+    
+    c = 0
+    s = None
+    for f in ls:
+        if isinstance(f, expressions.Size):
+            c = c+1
+            s = f
+                         
+    if c > 1 or c < 1:
+        pass #tirar error
+                         
+    # 2) A partir del objeto size lo evaluamos para conseguir el tamaño del canvas y lo generamos con svgwriter
+    
+    # el nombre realmente no importa dado que nunca lo guardamos a disco
+    dwg = svgwrite.Drawing('test.svg', size=f.evaluate()) # es nuestro lienzo para dibujar
+    
+    # 3) El drawing se lo pasamos a cada expresión de la lista con el método evaluar                         
+    # iteramos por cada expression (que son funciones) y las evaluamos para que se agreguen al canvas (si es necesario)
+    for f in ls:
+        f.evaluate(dwg)
+                         
+    # 4) a svgwriter le pedimos que genere el XML y lo devolvemos.                   
+    return dwg.tostring()
