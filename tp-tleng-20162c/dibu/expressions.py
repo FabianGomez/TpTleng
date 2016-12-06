@@ -30,9 +30,10 @@ class Rectangle(Expression):
         self.size = size
         self.upper_left = upper_left
         self.optional = optional
-
+            
     def evaluate(self, dwg):
-        dwg.add(dwg.rect(insert=self.upper_left, size=self.size, rx=None, ry=None))        
+        opt = self.optional
+        dwg.add(dwg.rect(insert=self.upper_left, size=self.size, rx=None, ry=None, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))        
 
     def __str__(self):
         cadena = "Rectangle: size=" + str(self.size) + " upper_left=" + str(self.upper_left) + " optional=" + str(self.optional)
@@ -46,7 +47,8 @@ class Line(Expression):
         self.optional = optional
 
     def evaluate(self,dwg):
-        dwg.add(dwg.line(start=self.froM, end=self.to))
+        opt = self.optional
+        dwg.add(dwg.line(start=self.froM, end=self.to, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
         
     def __str__(self):
         cadena = "Line: from=" + str(self.froM) + " to=" + str(self.to) + " optional=" + str(self.optional)
@@ -60,16 +62,12 @@ class Circle(Expression):
         self.optional = optional
 
     def evaluate(self,dwg):
-        dwg.add(dwg.circle(center=self.center, r=self.radius))
+        opt = self.optional
+        dwg.add(dwg.circle(center=self.center, r=self.radius, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
         
     def __str__(self):
         cadena = "Circle: center=" + str(self.center) + " radius=" + str(self.radius) + " optional=" + str(self.optional)
         return cadena  
-
-
-
-
-
 
 
 class Ellipse(Expression):
@@ -80,8 +78,9 @@ class Ellipse(Expression):
         self.ry = ry
         self.optional = optional
         
-    def evaluate(self):
-        dwg.add(dwg.ellipse(self.center, (self.rx,self.ry)))
+    def evaluate(self, dwg):
+        opt = self.optional
+        dwg.add(dwg.ellipse(self.center, (self.rx,self.ry), fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
         
     def __str__(self):
         cadena = "Ellipse: center=" + str(self.center) + " rx=" + str(self.rx) +  " ry=" + str(self.ry) + " optional=" + str(self.optional)
@@ -92,8 +91,9 @@ class Polyline(Expression):
         self.points = points
         self.optional = optional
         
-    def evaluate(self):
-        dwg.add(dwg.polyline(points=self.points))
+    def evaluate(self, dwg):
+        opt = self.optional
+        dwg.add(dwg.polyline(points=self.points, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
         
     def __str__(self):
         cadena = "Polyline: points=" + str(self.points) + " optional=" + str(self.optional)
@@ -104,8 +104,9 @@ class Polygon(Expression):
         self.points = points
         self.optional = optional
     
-    def evaluate(self):
-        dwg.add(dwg.polygon(points=self.points))
+    def evaluate(self, dwg):
+        opt = self.optional
+        dwg.add(dwg.polygon(points=self.points, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
     def __str__(self):
         cadena = "Polygon: points=" + str(self.points) + " optional=" + str(self.optional)
         return cadena 
@@ -115,8 +116,9 @@ class Text(Expression):
         self.t = t
         sefl.at = at
         self.optional = optional
-    def evaluate(self):
-        dwg.add(dwg.text(self.t, [self.at[0]], [self.at[1]]))
+    def evaluate(self, dwg):
+        opt = self.optional
+        dwg.add(dwg.text(self.t, [self.at[0]], [self.at[1]], fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
         
     def __str__(self):
         cadena = "Text: t=" + str(self.t) + "at=" + str(self.at) + " optional=" + str(self.optional)
@@ -128,7 +130,7 @@ class Point(Expression):
         self.x = x
         sefl.y = y
         
-    def evaluate(self):
+    def evaluate(self, dwg=None):
         return (x,y)
     
     def __str__(self):
