@@ -73,6 +73,19 @@ def p_arglist(subexpressions):
     subexpressions[0] = subexpressions[1]
 
 # Producciones Arg
+
+def p_arg_fill(subexpressions):
+    'arg : FILL EQUAL STRING'
+    subexpressions[0] = ("fill", subexpressions[3]["value"])
+    
+def p_arg_stroke(subexpressions):
+    'arg : STROKE EQUAL STRING'
+    subexpressions[0] = ("stroke", subexpressions[3]["value"])
+    
+def p_arg_strwidth(subexpressions):
+    'arg : STRWIDTH EQUAL NUMBER'
+    subexpressions[0] = ("stroke-width", subexpressions[3]["value"])
+    
 def p_arg_height(subexpressions):
     'arg : HEIGHT EQUAL NUMBER'
     subexpressions[0] = ("height", subexpressions[3]["value"])
@@ -115,7 +128,7 @@ def p_arg_points(subexpressions):
     
 def p_pointarray(subexpressions):
     'pointarray : LBRACKET pointlist RBRACKET'
-    subexpressions[0] = subexpression[2]
+    subexpressions[0] = subexpressions[2]
 
 def p_pointlist_point(subexpressions):
     'pointlist : point'
@@ -123,7 +136,9 @@ def p_pointlist_point(subexpressions):
 
 def p_pointlist(subexpressions):
     'pointlist : point COMMA pointlist'
-    subexpressions[0] = [subexpression[1]] ++ subexpressions[3]
+    l = subexpressions[3]
+    l.insert(0, subexpressions[1])
+    subexpressions[0] = l
     
 def p_arg_at(subexpressions):
     'arg : AT EQUAL point'
@@ -173,7 +188,7 @@ def p_f_line(subexpressions):
     hasArg("from", args)
     hasArg("to", args)
     
-    subexpressions[0] = Line(args["froM"], args["to"], getOptionalArgs(args, False)) 
+    subexpressions[0] = Line(args["from"], args["to"], getOptionalArgs(args, False)) 
 
 def p_f_circle(subexpressions):
     'f : CIRCLE arglist' 
@@ -217,7 +232,7 @@ def p_f_text(subexpressions):
     hasArg("t", args)
     hasArg("at", args)
     
-    subexpressions[0] = Polygon(args["points"], getOptionalArgs(args, True))
+    subexpressions[0] = Text(args["t"], args["at"], getOptionalArgs(args, True))
           
 def p_point(subexpressions):
     'point : LPAREN NUMBER COMMA NUMBER RPAREN'

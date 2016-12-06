@@ -49,6 +49,7 @@ class Line(Expression):
     def evaluate(self,dwg):
         opt = self.optional
         dwg.add(dwg.line(start=self.froM, end=self.to, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
+        #dwg.add(dwg.line(start=self.froM, end=self.to))
         
     def __str__(self):
         cadena = "Line: from=" + str(self.froM) + " to=" + str(self.to) + " optional=" + str(self.optional)
@@ -94,6 +95,7 @@ class Polyline(Expression):
     def evaluate(self, dwg):
         opt = self.optional
         dwg.add(dwg.polyline(points=self.points, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
+        #dwg.add(dwg.polyline(points=self.points))
         
     def __str__(self):
         cadena = "Polyline: points=" + str(self.points) + " optional=" + str(self.optional)
@@ -114,11 +116,11 @@ class Polygon(Expression):
 class Text(Expression):
     def __init__(self, t, at, optional):
         self.t = t
-        sefl.at = at
+        self.at = at
         self.optional = optional
     def evaluate(self, dwg):
         opt = self.optional
-        dwg.add(dwg.text(self.t, [self.at[0]], [self.at[1]], fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
+        dwg.add(dwg.text(text=self.t, insert=self.at, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1), font_family=opt.get("font-family", None), font_size=opt.get("font-size", 14) ))
         
     def __str__(self):
         cadena = "Text: t=" + str(self.t) + "at=" + str(self.at) + " optional=" + str(self.optional)

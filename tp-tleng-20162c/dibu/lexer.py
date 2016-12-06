@@ -47,7 +47,8 @@ def t_NUMBER(token):
     return token
 
 def t_STRING(token):
-    r'\"([^\\\n]|(\\.))*\"'
+    r'"(.*?)"'
+    #r'\"([^\\\n]|(\\.))*\"'
     string_type = "string"
     #removemos las comillas obligatorias
     string_value = token.value[1:-1]
