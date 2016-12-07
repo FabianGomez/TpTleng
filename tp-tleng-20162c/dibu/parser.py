@@ -19,6 +19,11 @@ def hasArg(argname, args):
     if not(argname in args.keys()):
         raise SemanticException("Argumento obligatorio no encontrado: " + str(argname))
         
+def correctArgs(possibleArgs, args):
+    for k in args.keys():
+        if k not in possibleArgs:
+            raise SemanticException("Argumento no válido: " + str(k))
+        
 def getOptionalArgs(args, isText):
     res = {}
     if "fill" in args.keys():
@@ -164,8 +169,10 @@ def p_f_size(subexpressions):
     'f : SIZE arglist' 
     args = subexpressions[2]
     
+    possibleArgs = ["width", "height", "fill", "stroke", "stroke-width"]
+    correctArgs(possibleArgs, args)        
     hasArg("width", args)
-    hasArg("height", args)    
+    hasArg("height", args)
 
     subexpressions[0] = Size(args["width"], args["height"], getOptionalArgs(args, False)) 
 
@@ -173,9 +180,8 @@ def p_f_size(subexpressions):
 def p_f_rectangle(subexpressions):
     'f : RECTANGLE arglist' 
     args = subexpressions[2]
-    
-    #hasArg("width", args)
-    #hasArg("height", args)
+    possibleArgs = ["size", "upper_left", "fill", "stroke", "stroke-width"]
+    correctArgs(possibleArgs, args)
     hasArg("size", args)
     hasArg("upper_left", args)
     
@@ -184,7 +190,8 @@ def p_f_rectangle(subexpressions):
 def p_f_line(subexpressions):
     'f : LINE arglist' 
     args = subexpressions[2]
-    
+    possibleArgs = ["from", "to", "fill", "stroke", "stroke-width"]
+    correctArgs(possibleArgs, args)
     hasArg("from", args)
     hasArg("to", args)
     
@@ -194,6 +201,8 @@ def p_f_circle(subexpressions):
     'f : CIRCLE arglist' 
     args = subexpressions[2]
     
+    possibleArgs = ["center", "radius", "fill", "stroke", "stroke-width"]
+    correctArgs(possibleArgs, args)
     hasArg("center", args)
     hasArg("radius", args)
     
@@ -202,7 +211,8 @@ def p_f_circle(subexpressions):
 def p_f_ellipse(subexpressions):
     'f : ELLIPSE arglist' 
     args = subexpressions[2]
-    
+    possibleArgs = ["center", "rx", "ry", "fill", "stroke", "stroke-width"]
+    correctArgs(possibleArgs, args)
     hasArg("center", args)
     hasArg("rx", args)
     hasArg("ry", args)
@@ -212,7 +222,8 @@ def p_f_ellipse(subexpressions):
 def p_f_polyline(subexpressions):
     'f : POLYLINE arglist' 
     args = subexpressions[2]
-    
+    possibleArgs = ["points", "fill", "stroke", "stroke-width"]
+    correctArgs(possibleArgs, args)
     hasArg("points", args)
 
     subexpressions[0] = Polyline(args["points"], getOptionalArgs(args, False))
@@ -220,7 +231,8 @@ def p_f_polyline(subexpressions):
 def p_f_polygon(subexpressions):
     'f : POLYGON arglist' 
     args = subexpressions[2]
-    
+    possibleArgs = ["points", "fill", "stroke", "stroke-width"]
+    correctArgs(possibleArgs, args)
     hasArg("points", args)
     
     subexpressions[0] = Polygon(args["points"], getOptionalArgs(args, False))
@@ -228,7 +240,8 @@ def p_f_polygon(subexpressions):
 def p_f_text(subexpressions):
     'f : TEXT arglist' 
     args = subexpressions[2]
-    
+    possibleArgs = ["t", "at", "font-family", "font-size", "fill", "stroke", "stroke-width"]
+    correctArgs(possibleArgs, args)
     hasArg("t", args)
     hasArg("at", args)
     
