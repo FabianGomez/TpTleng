@@ -94,18 +94,28 @@ t_STRWIDTH         = r'stroke-width'
 
 
 def t_NEWLINE(token):
-    r"\n+"
-    token.lexer.lineno += len(token.value)
+    r"\n"
+    token.lexer.lineno += 1
     
 t_ignore = " \t"
 
-def t_error(t):
-    print("ERROR")
-    pass
+def t_error(token):
+    message = "Token desconocido:"
+    message = "\ntype:" + token.type
+    message += "\nvalue:" + str(token.value)
+    message += "\nline:" + str(token.lineno)
+    message += "\nposition:" + str(token.lexpos)
+    raise Exception(message)
 
 # Build the lexer
 lexer = lex.lex()
 
+# entre distintos casos de tests es necesario resetear el parser
+# sino se usa el mismo objeto lexer para todos los parseos
+# eso introduce errores como tener mal el numero de lineas
+def reset():
+    lexer = lex.lex()
+    
 def apply(string):
     u"""Aplica el análisis léxico al string dado."""
     lex.input(string)
