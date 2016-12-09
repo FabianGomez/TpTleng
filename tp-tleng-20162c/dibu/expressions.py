@@ -5,7 +5,25 @@ class Expression(object):
     def evaluate(self, dwg=None):
         # Aca se implementa cada tipo de expresion.
         raise NotImplementedError
-
+    
+    def buildStyle(self):
+        opt = self.optional
+        
+        s = ""
+        if "fill" in opt.keys():
+            s += "fill: " + str(opt["fill"]) + "; "
+        if "stroke" in opt.keys():
+            s += "stroke: " + str(opt["stroke"]) + "; "
+        if "stroke-width" in opt.keys():
+            s += "stroke-width: " + str(opt["stroke-width"]) + "; "
+        
+        s += opt.get("style", "")
+        
+        if s == "": # sino quedo nada
+            s = None
+            
+        return s
+        
     def __repr__(self):
         return self.__str__()
 # las funciones nada mas son representadas por clases
@@ -33,7 +51,7 @@ class Rectangle(Expression):
             
     def evaluate(self, dwg):
         opt = self.optional
-        dwg.add(dwg.rect(insert=self.upper_left, size=self.size, rx=None, ry=None, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))        
+        dwg.add(dwg.rect(insert=self.upper_left, size=self.size, rx=None, ry=None, style=self.buildStyle()))  
 
     def __str__(self):
         cadena = "Rectangle: size=" + str(self.size) + " upper_left=" + str(self.upper_left) + " optional=" + str(self.optional)
@@ -48,7 +66,7 @@ class Line(Expression):
 
     def evaluate(self,dwg):
         opt = self.optional
-        dwg.add(dwg.line(start=self.froM, end=self.to, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
+        dwg.add(dwg.line(start=self.froM, end=self.to, style=self.buildStyle()))  
         #dwg.add(dwg.line(start=self.froM, end=self.to))
         
     def __str__(self):
@@ -64,7 +82,7 @@ class Circle(Expression):
 
     def evaluate(self,dwg):
         opt = self.optional
-        dwg.add(dwg.circle(center=self.center, r=self.radius, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
+        dwg.add(dwg.circle(center=self.center, r=self.radius, style=self.buildStyle()))  
         
     def __str__(self):
         cadena = "Circle: center=" + str(self.center) + " radius=" + str(self.radius) + " optional=" + str(self.optional)
@@ -81,7 +99,7 @@ class Ellipse(Expression):
         
     def evaluate(self, dwg):
         opt = self.optional
-        dwg.add(dwg.ellipse(self.center, (self.rx,self.ry), fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
+        dwg.add(dwg.ellipse(self.center, (self.rx,self.ry), style=self.buildStyle()))  
         
     def __str__(self):
         cadena = "Ellipse: center=" + str(self.center) + " rx=" + str(self.rx) +  " ry=" + str(self.ry) + " optional=" + str(self.optional)
@@ -93,9 +111,8 @@ class Polyline(Expression):
         self.optional = optional
         
     def evaluate(self, dwg):
-        opt = self.optional
-        dwg.add(dwg.polyline(points=self.points, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
-        #dwg.add(dwg.polyline(points=self.points))
+        opt = self.optional 
+        dwg.add(dwg.polyline(points=self.points, style=self.buildStyle()))  
         
     def __str__(self):
         cadena = "Polyline: points=" + str(self.points) + " optional=" + str(self.optional)
@@ -107,8 +124,7 @@ class Polygon(Expression):
         self.optional = optional
     
     def evaluate(self, dwg):
-        opt = self.optional
-        dwg.add(dwg.polygon(points=self.points, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1)))
+        dwg.add(dwg.polygon(points=self.points, style=self.buildStyle()))  
     def __str__(self):
         cadena = "Polygon: points=" + str(self.points) + " optional=" + str(self.optional)
         return cadena 
@@ -120,7 +136,7 @@ class Text(Expression):
         self.optional = optional
     def evaluate(self, dwg):
         opt = self.optional
-        dwg.add(dwg.text(text=self.t, insert=self.at, fill=opt.get("fill", ""), stroke=opt.get("stroke", ""), stroke_width=opt.get("stroke-width", 1), font_family=opt.get("font-family", None), font_size=opt.get("font-size", 14) ))
+        dwg.add(dwg.text(text=self.t, insert=self.at, style=self.buildStyle(), stroke_width=opt.get("stroke-width", 1), font_family=opt.get("font-family", None), font_size=opt.get("font-size", 14) ))
         
     def __str__(self):
         cadena = "Text: t=" + str(self.t) + "at=" + str(self.at) + " optional=" + str(self.optional)

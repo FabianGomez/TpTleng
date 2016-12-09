@@ -33,7 +33,9 @@ def getOptionalArgs(args, isText):
         res["stroke"] = args["stroke"]
     if "stroke-width" in args.keys():
         res["stroke-width"] = args["stroke-width"]
-    
+    if "style" in args.keys():
+        res["style"] = args["style"]
+        
     if isText:
         if "font-family" in args.keys():
             res["font-family"] = args["font-family"]
@@ -181,11 +183,15 @@ def p_arg_size(subexpressions):
     'arg : SIZE EQUAL point'
     subexpressions[0] = ("size", subexpressions[3])
 
+def p_arg_style(subexpressions):
+    'arg : STYLE EQUAL STRING'
+    subexpressions[0] = ("style", subexpressions[3]["value"])
+
 def p_f_size(subexpressions):
     'f : SIZE arglist' 
     args = subexpressions[2]
     
-    possibleArgs = ["width", "height", "fill", "stroke", "stroke-width"]
+    possibleArgs = ["width", "height", "fill", "stroke", "stroke-width", "style"]
     correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("width", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("height", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
@@ -196,7 +202,7 @@ def p_f_size(subexpressions):
 def p_f_rectangle(subexpressions):
     'f : RECTANGLE arglist' 
     args = subexpressions[2]
-    possibleArgs = ["size", "upper_left", "fill", "stroke", "stroke-width"]
+    possibleArgs = ["size", "upper_left", "fill", "stroke", "stroke-width", "style"]
     correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("size", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("upper_left", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
@@ -206,7 +212,7 @@ def p_f_rectangle(subexpressions):
 def p_f_line(subexpressions):
     'f : LINE arglist' 
     args = subexpressions[2]
-    possibleArgs = ["from", "to", "fill", "stroke", "stroke-width"]
+    possibleArgs = ["from", "to", "fill", "stroke", "stroke-width", "style"]
     correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("from", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("to", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
@@ -217,7 +223,7 @@ def p_f_circle(subexpressions):
     'f : CIRCLE arglist' 
     args = subexpressions[2]
     
-    possibleArgs = ["center", "radius", "fill", "stroke", "stroke-width"]
+    possibleArgs = ["center", "radius", "fill", "stroke", "stroke-width", "style"]
     correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))
     hasArg("center", args, subexpressions.lineno(1), subexpressions.lexpos(1))
     hasArg("radius", args, subexpressions.lineno(1), subexpressions.lexpos(1))
@@ -227,7 +233,7 @@ def p_f_circle(subexpressions):
 def p_f_ellipse(subexpressions):
     'f : ELLIPSE arglist' 
     args = subexpressions[2]
-    possibleArgs = ["center", "rx", "ry", "fill", "stroke", "stroke-width"]
+    possibleArgs = ["center", "rx", "ry", "fill", "stroke", "stroke-width", "style"]
     correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("center", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("rx", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
@@ -238,7 +244,7 @@ def p_f_ellipse(subexpressions):
 def p_f_polyline(subexpressions):
     'f : POLYLINE arglist' 
     args = subexpressions[2]
-    possibleArgs = ["points", "fill", "stroke", "stroke-width"]
+    possibleArgs = ["points", "fill", "stroke", "stroke-width", "style"]
     correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("points", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
 
@@ -247,7 +253,7 @@ def p_f_polyline(subexpressions):
 def p_f_polygon(subexpressions):
     'f : POLYGON arglist' 
     args = subexpressions[2]
-    possibleArgs = ["points", "fill", "stroke", "stroke-width"]
+    possibleArgs = ["points", "fill", "stroke", "stroke-width", "style"]
     correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("points", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     
@@ -256,7 +262,7 @@ def p_f_polygon(subexpressions):
 def p_f_text(subexpressions):
     'f : TEXT arglist' 
     args = subexpressions[2]
-    possibleArgs = ["t", "at", "font-family", "font-size", "fill", "stroke", "stroke-width"]
+    possibleArgs = ["t", "at", "font-family", "font-size", "fill", "stroke", "stroke-width", "style"]
     correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("t", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     hasArg("at", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
@@ -290,15 +296,18 @@ def buildSVG(ls):
             c = c+1
             s = f
 
-    if c > 1 or c < 1:
+    if c > 1:
         # para este error no hay una linea en donde lanzar el error.
         raise Exception("ERROR: Debe haber una y solo una funcion size definida.")
                   
     # 2) A partir del objeto size lo evaluamos para conseguir el tamaño del canvas y lo generamos con svgwriter
     
-    # el nombre realmente no importa dado que nunca lo guardamos a disco
-    dwg = svgwrite.Drawing('test.svg', size=s.evaluate(None)) # es nuestro lienzo para dibujar
-    
+    if s:
+        # el nombre realmente no importa dado que nunca lo guardamos a disco
+        dwg = svgwrite.Drawing('test.svg', size=s.evaluate(None)) # es nuestro lienzo para dibujar
+    else:
+        dwg = svgwrite.Drawing('test.svg')
+        
     # 3) El drawing se lo pasamos a cada expresión de la lista con el método evaluar                         
     # iteramos por cada expression (que son funciones) y las evaluamos para que se agreguen al canvas (si es necesario)
     for f in ls:

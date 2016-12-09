@@ -28,7 +28,7 @@ tokens = [
     'HEIGHT','WIDTH','ULEFT','FROM','CENTER','RADIUS','RX','RY','TO', 'T', 'AT', 'POINTS',
 
 #parametros opcionales
-'FFAMILY','FSIZE','FILL','STROKE','STRWIDTH'
+'FFAMILY','FSIZE','FILL','STROKE','STRWIDTH', 'STYLE'
     ]
 
 
@@ -91,6 +91,7 @@ t_FSIZE            = r'font-size'
 t_FILL             = r'fill'
 t_STROKE           = r'stroke'
 t_STRWIDTH         = r'stroke-width'
+t_STYLE            = r'style'
 
 
 def t_NEWLINE(token):
