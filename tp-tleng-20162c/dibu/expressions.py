@@ -19,9 +19,10 @@ class Expression(object):
         
         s += opt.get("style", "")
         
+        s = s.strip()
         if s == "": # sino quedo nada
             s = None
-            
+         
         return s
         
     def __repr__(self):

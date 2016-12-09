@@ -279,7 +279,7 @@ parserInput = ""
 
 def parse(s):
     """Dado un string, me lo convierte a SVG."""
-    global parserInput
+    global parserInput # asi la usamos para calcular la columna dentro de una linea a la hora de manejar errores
     parserInput = s
     reset() # reseteamos el objeto lexer - sino se superpone el conteo de lineas
     r = parser.parse(s)
@@ -298,20 +298,20 @@ def buildSVG(ls):
 
     if c > 1:
         # para este error no hay una linea en donde lanzar el error.
-        raise Exception("ERROR: Debe haber una y solo una funcion size definida.")
+        raise Exception("ERROR: Debe haber a lo sumo una funcion size definida.")
                   
     # 2) A partir del objeto size lo evaluamos para conseguir el tamaño del canvas y lo generamos con svgwriter
     
     if s:
         # el nombre realmente no importa dado que nunca lo guardamos a disco
-        dwg = svgwrite.Drawing('test.svg', size=s.evaluate(None)) # es nuestro lienzo para dibujar
+        dwg = svgwrite.Drawing('test.svg',size=s.evaluate(None)) # es nuestro lienzo para dibujar
     else:
         dwg = svgwrite.Drawing('test.svg')
-        
+    
     # 3) El drawing se lo pasamos a cada expresión de la lista con el método evaluar                         
     # iteramos por cada expression (que son funciones) y las evaluamos para que se agreguen al canvas (si es necesario)
     for f in ls:
         f.evaluate(dwg)
-                         
+       
     # 4) a svgwriter le pedimos que genere el XML y lo devolvemos.                   
     return dwg.tostring()
