@@ -5,10 +5,10 @@ import ply.yacc as yacc
 import collections
 
 import svgwrite
-from expressions import *
+from .expressions import *
 
-from lexer import tokens
-from lexer import reset
+from .lexer import tokens
+from .lexer import reset
 
 
 # un argumento es una tupla (nombreArgumento, valor)
@@ -16,14 +16,14 @@ from lexer import reset
 
 # Funciones auxiliares
 # por como se construye argList sabemos que args no tendra mas de un valor para la misma clave
-def hasArg(argname, args, lineno):
+def hasArg(argname, args, lineno, lexpos):
     if not(argname in args.keys()):
-        raise Exception("ERROR: Argumento obligatorio no encontrado: " + str(argname) + ". Linea: " + str(lineno))
+        raise Exception("ERROR: Argumento obligatorio no encontrado: " + str(argname) + ". Linea: " + str(lineno) + " Para la funcion en posicion (relativa a la linea): " + str(find_column(lexpos)))
         
-def correctArgs(possibleArgs, args, lineno):
+def correctArgs(possibleArgs, args, lineno, lexpos):
     for k in args.keys():
         if k not in possibleArgs:
-            raise Exception("ERROR: Argumento no válido: " + str(k) + ". Linea: " + str(lineno))
+            raise Exception("ERROR: Argumento no válido: " + str(k) + ". Linea: " + str(lineno) + " Para la funcion en posicion (relativa a la linea): " + str(find_column(lexpos)))
         
 def getOptionalArgs(args, isText):
     res = {}
@@ -42,8 +42,22 @@ def getOptionalArgs(args, isText):
             
     return res
 
+# Compute column. 
+#     input is the input text string
+#     token is a token instance
+def find_column(posToken): # la sacamos de la documentacion
+    last_cr = parserInput.rfind('\n',0,posToken)
+    if last_cr < 0:
+        last_cr = 0
+    column = (posToken - last_cr) + 1
+    return column
+
 def p_error(subexpr):
-    msg = "Syntax error: " + str(subexpr.lineno)   
+    if subexpr:
+        msg = "Error sintactico en linea " + str(subexpr.lineno) + " en la posición (relativa a la linea): " + str(find_column(subexpr.lexpos))
+    else:
+        msg="Error en el fin del archivo"
+        
     raise Exception(msg)
 
 # Producciones
@@ -73,7 +87,7 @@ def p_arglist(subexpressions):
     # arglist es un diccionario de argumentos
     # no puede aparecer mas de una vez el mismo argumento
     if k in subexpressions[1].keys():
-        raise Exception("El argumento " + str(k) +  " aparece mas de una vez. Linea: " + subexpressions.lineno(0))
+        raise Exception("El argumento " + str(k) +  " aparece mas de una vez. Linea: " + str(subexpressions.lineno(2)) + " Posicion (relativa a la linea) " + str(find_column(subexpressions.lexpos(2))))
     
     # agregamos el nuevo argumento
     subexpressions[1][k]=v
@@ -172,9 +186,9 @@ def p_f_size(subexpressions):
     args = subexpressions[2]
     
     possibleArgs = ["width", "height", "fill", "stroke", "stroke-width"]
-    correctArgs(possibleArgs, args, subexpressions.lineno(0))        
-    hasArg("width", args, subexpressions.lineno(0))
-    hasArg("height", args, subexpressions.lineno(0))
+    correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("width", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("height", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
 
     subexpressions[0] = Size(args["width"], args["height"], getOptionalArgs(args, False)) 
 
@@ -183,9 +197,9 @@ def p_f_rectangle(subexpressions):
     'f : RECTANGLE arglist' 
     args = subexpressions[2]
     possibleArgs = ["size", "upper_left", "fill", "stroke", "stroke-width"]
-    correctArgs(possibleArgs, args, subexpressions.lineno(0))
-    hasArg("size", args, subexpressions.lineno(0))
-    hasArg("upper_left", args, subexpressions.lineno(0))
+    correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("size", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("upper_left", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     
     subexpressions[0] = Rectangle(args["size"], args["upper_left"], getOptionalArgs(args, False)) 
 
@@ -193,9 +207,9 @@ def p_f_line(subexpressions):
     'f : LINE arglist' 
     args = subexpressions[2]
     possibleArgs = ["from", "to", "fill", "stroke", "stroke-width"]
-    correctArgs(possibleArgs, args, subexpressions.lineno(0))
-    hasArg("from", args, subexpressions.lineno(0))
-    hasArg("to", args, subexpressions.lineno(0))
+    correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("from", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("to", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     
     subexpressions[0] = Line(args["from"], args["to"], getOptionalArgs(args, False)) 
 
@@ -204,9 +218,9 @@ def p_f_circle(subexpressions):
     args = subexpressions[2]
     
     possibleArgs = ["center", "radius", "fill", "stroke", "stroke-width"]
-    correctArgs(possibleArgs, args, subexpressions.lineno(0))
-    hasArg("center", args, subexpressions.lineno(0))
-    hasArg("radius", args, subexpressions.lineno(0))
+    correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))
+    hasArg("center", args, subexpressions.lineno(1), subexpressions.lexpos(1))
+    hasArg("radius", args, subexpressions.lineno(1), subexpressions.lexpos(1))
     
     subexpressions[0] = Circle(args["center"], args["radius"], getOptionalArgs(args, False)) 
     
@@ -214,10 +228,10 @@ def p_f_ellipse(subexpressions):
     'f : ELLIPSE arglist' 
     args = subexpressions[2]
     possibleArgs = ["center", "rx", "ry", "fill", "stroke", "stroke-width"]
-    correctArgs(possibleArgs, args, subexpressions.lineno(0))
-    hasArg("center", args, subexpressions.lineno(0))
-    hasArg("rx", args, subexpressions.lineno(0))
-    hasArg("ry", args, subexpressions.lineno(0))
+    correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("center", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("rx", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("ry", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     
     subexpressions[0] = Ellipse(args["center"], args["rx"], args["ry"], getOptionalArgs(args, False))
 
@@ -225,8 +239,8 @@ def p_f_polyline(subexpressions):
     'f : POLYLINE arglist' 
     args = subexpressions[2]
     possibleArgs = ["points", "fill", "stroke", "stroke-width"]
-    correctArgs(possibleArgs, args, subexpressions.lineno(0))
-    hasArg("points", args, subexpressions.lineno(0))
+    correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("points", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
 
     subexpressions[0] = Polyline(args["points"], getOptionalArgs(args, False))
     
@@ -234,8 +248,8 @@ def p_f_polygon(subexpressions):
     'f : POLYGON arglist' 
     args = subexpressions[2]
     possibleArgs = ["points", "fill", "stroke", "stroke-width"]
-    correctArgs(possibleArgs, args, subexpressions.lineno(0))
-    hasArg("points", args, subexpressions.lineno(0))
+    correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("points", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     
     subexpressions[0] = Polygon(args["points"], getOptionalArgs(args, False))
 
@@ -243,9 +257,9 @@ def p_f_text(subexpressions):
     'f : TEXT arglist' 
     args = subexpressions[2]
     possibleArgs = ["t", "at", "font-family", "font-size", "fill", "stroke", "stroke-width"]
-    correctArgs(possibleArgs, args, subexpressions.lineno(0))
-    hasArg("t", args, subexpressions.lineno(0))
-    hasArg("at", args, subexpressions.lineno(0))
+    correctArgs(possibleArgs, args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("t", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
+    hasArg("at", args, subexpressions.lineno(1), subexpressions.lexpos(1))  
     
     subexpressions[0] = Text(args["t"], args["at"], getOptionalArgs(args, True))
           
@@ -255,11 +269,15 @@ def p_point(subexpressions):
                                                            
 # Build the parser
 parser = yacc.yacc(debug=True)
+parserInput = ""
 
-def parse(str):
+def parse(s):
     """Dado un string, me lo convierte a SVG."""
+    global parserInput
+    parserInput = s
     reset() # reseteamos el objeto lexer - sino se superpone el conteo de lineas
-    return parser.parse(str)
+    r = parser.parse(s)
+    return buildSVG(r)
 
 def buildSVG(ls):
     # Si todo fue exitoso ls debería ser una lista de expresiones.
@@ -271,11 +289,11 @@ def buildSVG(ls):
         if isinstance(f, Size):
             c = c+1
             s = f
-   
+
     if c > 1 or c < 1:
         # para este error no hay una linea en donde lanzar el error.
-        Exception("ERROR: Debe haber una y solo una funcion size definida.")
-                         
+        raise Exception("ERROR: Debe haber una y solo una funcion size definida.")
+                  
     # 2) A partir del objeto size lo evaluamos para conseguir el tamaño del canvas y lo generamos con svgwriter
     
     # el nombre realmente no importa dado que nunca lo guardamos a disco

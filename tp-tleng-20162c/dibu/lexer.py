@@ -99,7 +99,12 @@ def t_NEWLINE(token):
     
 t_ignore = " \t"
 
+# EOF handling rule
+def t_eof(t):
+    return None
+
 def t_error(token):
+    print("T_ERROR")
     message = "Token desconocido:"
     message = "\ntype:" + token.type
     message += "\nvalue:" + str(token.value)
@@ -114,6 +119,7 @@ lexer = lex.lex()
 # sino se usa el mismo objeto lexer para todos los parseos
 # eso introduce errores como tener mal el numero de lineas
 def reset():
+    global lexer
     lexer = lex.lex()
     
 def apply(string):
