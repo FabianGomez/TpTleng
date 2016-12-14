@@ -23,15 +23,10 @@ tokens = [
 'NEWLINE','NUMBER', 'STRING','LPAREN', 'RPAREN',
     'LBRACKET', 'RBRACKET','COMMA', 'EQUAL',
 #inicios de funciones
-    'SIZE','RECTANGLE','LINE','CIRCLE','ELLIPSE','POLYLINE','POLYGON','TEXT',
-#parametros obligatorios
-    'HEIGHT','WIDTH','ULEFT','FROM','CENTER','RADIUS','RX','RY','TO', 'T', 'AT', 'POINTS',
-
-#parametros opcionales
-'FFAMILY','FSIZE','FILL','STROKE','STRWIDTH', 'STYLE'
+    'FUNC',
+#parametros
+    'ARG'
     ]
-
-
 
 def t_NUMBER(token):
     #primera parte es para floats  y la segunda para integers
@@ -55,8 +50,6 @@ def t_STRING(token):
     token.value = {"value": string_value, "type": string_type}
     return token
 
-
-t_POINTS           = r'points'
 t_LPAREN           = r'\('
 t_RPAREN           = r'\)'
 t_LBRACKET         = r'\['
@@ -64,35 +57,13 @@ t_RBRACKET         = r'\]'
 t_EQUAL            = r'='
 t_COMMA            = r','
 
-t_SIZE             = r'size '
-t_RECTANGLE        = r'rectangle '
-t_LINE             = r'line '
-t_CIRCLE           = r'circle '
-t_ELLIPSE          = r'ellipse '
-t_POLYLINE         = r'polyline '
-t_POLYGON          = r'polygon '
-t_TEXT             = r'text '
+def t_FUNC(token):
+    r'text|size|rectangle|line|circle|ellipse|polyline|polygon'
+    return token
 
-
-t_HEIGHT           = r'height'
-t_WIDTH            = r'width'
-t_ULEFT            = r'upper_left'
-t_FROM             = r'from'
-t_CENTER           = r'center'
-t_RADIUS           = r'radius'
-t_RX               = r'rx'
-t_RY               = r'ry'
-t_TO               = r'to'
-t_AT               = r'at'
-t_T                = r't'
-
-t_FFAMILY          = r'font-family'
-t_FSIZE            = r'font-size'
-t_FILL             = r'fill'
-t_STROKE           = r'stroke'
-t_STRWIDTH         = r'stroke-width'
-t_STYLE            = r'style'
-
+def t_ARG(token):
+    r'height|width|upper_left|from|center|radius|rx|ry|to|at|t|font-family|font-size|fill|stroke-width|stroke|style|points'
+    return token
 
 def t_NEWLINE(token):
     r"\n"
