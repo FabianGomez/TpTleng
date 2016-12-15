@@ -106,34 +106,52 @@ def p_arglist(subexpressions):
     # agregamos el nuevo argumento
     subexpressions[1][k]=v
     subexpressions[0] = subexpressions[1]
-
-
+  
 # Producciones Arg
-def p_arg_number(subexpressions):
-    'arg : ARG EQUAL NUMBER'
-    if subexpressions[1] not in {"rx", "ry", "radius", "stroke-width", "height", "width"}:
-        raise Exception("El argumento " + str(subexpressions[1]) +  " no acepta numeros. Linea: " + str(subexpressions.lineno(1)) + " Posicion (relativa a la linea) " + str(find_column(subexpressions.lexpos(1))))
-    subexpressions[0] = (subexpressions[1], subexpressions[3]["value"])
 
-def p_arg_string(subexpressions):
+argsPerValue = {"number":{"rx", "ry", "radius", "stroke-width", "height", "width"},
+                "string":{"fill", "stroke", "t", "font-family", "font-size", "style"},
+                "point":{"upper_left", "from", "to", "center", "at"},
+                "pointarray":{"points"}}
+
+def p_arg_value(subexpressions):
+    'arg : ARG EQUAL value '
+    checkArgs = {}
+    valor = ""
+    if type(subexpressions[3]) is list:
+        valor = "pointarray"
+    elif type(subexpressions[3]) is tuple:
+        valor = "point"
+    elif subexpressions[3]["type"] == "string":
+        valor = "string"
+    elif subexpressions[3]["type"] == "number":
+        valor = "number"
     
-    'arg : ARG EQUAL STRING'
-    if subexpressions[1] not in {"fill", "stroke", "t", "font-family", "font-size", "style"}:
-        raise Exception("El argumento " + str(subexpressions[1]) +  " no acepta string. Linea: " + str(subexpressions.lineno(1)) + " Posicion (relativa a la linea) " + str(find_column(subexpressions.lexpos(1))))
-    subexpressions[0] = (subexpressions[1], subexpressions[3]["value"])
+    checkArgs = argsPerValue[valor]
+    
+    if subexpressions[1] not in checkArgs:
+        raise Exception("El argumento " + str(subexpressions[1]) +  " no acepta " + valor + ". Linea: " + str(subexpressions.lineno(1)) + " Posicion (relativa a la linea) " + str(find_column(subexpressions.lexpos(1))))
+        
+    if valor == "pointarray" or valor == "point":
+        subexpressions[0] = (subexpressions[1], subexpressions[3])
+    elif valor == "string" or valor == "number":
+        subexpressions[0] = (subexpressions[1], subexpressions[3]["value"])
 
-def p_arg_point(subexpressions):
-    'arg : ARG EQUAL point'
-    if subexpressions[1] not in {"upper_left", "from", "to", "center", "at", "size"}:
-        raise Exception("El argumento " + str(subexpressions[1]) +  " no acepta point. Linea: " + str(subexpressions.lineno(1)) + " Posicion (relativa a la linea) " + str(find_column(subexpressions.lexpos(1))))
-    subexpressions[0] = (subexpressions[1], subexpressions[3])
-
-def p_arg_points(subexpressions):
-    'arg : ARG EQUAL pointarray'
-    if subexpressions[1] not in {"points"}:
-        raise Exception("El argumento " + str(subexpressions[1]) +  " no acepta point array. Linea: " + str(subexpressions.lineno(1)) + " Posicion (relativa a la linea) " + str(find_column(subexpressions.lexpos(1))))
-    subexpressions[0] = (subexpressions[1], subexpressions[3])
-
+def p_value_number(subexpressions):
+    'value : NUMBER'
+    subexpressions[0] = subexpressions[1]
+    
+def p_value_string(subexpressions):
+    'value : STRING'
+    subexpressions[0] = subexpressions[1]
+    
+def p_value_point(subexpressions):
+    'value : point'
+    subexpressions[0] = subexpressions[1]
+    
+def p_value_pointarray(subexpressions):
+    'value : pointarray'
+    subexpressions[0] = subexpressions[1]  
 def p_pointarray(subexpressions):
     'pointarray : LBRACKET pointlist RBRACKET'
     subexpressions[0] = subexpressions[2]
@@ -212,6 +230,12 @@ def buildSVG(ls):
     
     # 1) A partir del objeto size lo evaluamos para conseguir el tamaño del canvas y lo generamos con svgwriter
     
+    #print("buildSVG: " + str(ls))
+    
+    s = None
+    for f in ls: # iteramos nada mas para saber si hay o no un size. No nos ocupamos de rechazar aca!
+        if type(f) is Size:
+            s = f
     if s:
         # el nombre realmente no importa dado que nunca lo guardamos a disco
         dwg = svgwrite.Drawing('test.svg',size=s.evaluate(None)) # es nuestro lienzo para dibujar

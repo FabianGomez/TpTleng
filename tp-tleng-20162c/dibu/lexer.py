@@ -76,9 +76,10 @@ def t_eof(t):
     return None
 
 def t_error(token):
-    print("T_ERROR")
-    message = "Token desconocido:"
-    message = "\ntype:" + token.type
+    
+    message = "Error Lexer."
+    message += "\nToken desconocido:"
+    message += "\ntype:" + token.type
     message += "\nvalue:" + str(token.value)
     message += "\nline:" + str(token.lineno)
     message += "\nposition:" + str(token.lexpos)
